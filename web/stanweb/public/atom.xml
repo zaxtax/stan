@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Stan]]></title>
+  <link href="http://mc-stan.org/atom.xml" rel="self"/>
+  <link href="http://mc-stan.org/"/>
+  <updated>2012-08-23T18:58:10-04:00</updated>
+  <id>http://mc-stan.org/</id>
+  <author>
+    <name><![CDATA[Stan Development Team]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Download]]></title>
+    <link href="http://mc-stan.org/download/"/>
+    <updated>2012-08-24T13:48:00-04:00</updated>
+    <id>http://mc-stan.org/download</id>
+    <content type="html"><![CDATA[<h2><a href="http://stangooglecodelink">Latest</a> (Stan 1.0.0)</h2>
+
+<h2><a href="http://mc-stan.org/getting-started">RStan</a></h2>
+
+<h3>Licensing</h3>
+
+<ul>
+<li>Stan is licensed under the <a href="http://opensource.org/licenses/bsd-license.php">new BSD</a> license</li>
+<li>RStan is licensed under the <a href="http://gplv3.fsf.org">GPLv3</a> license</li>
+<li>Stan depends on Eigen (<a href="http://www.mozilla.org/MPL/">MPL</a>) and Boost (<a href="http://www.boost.org/users/license.html">Boost license</a>).</li>
+<li>Stan and RStan are copyrighted by the <a href="http://mc-stan.org/team">Stan Development Team</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Getting Started with Rstan]]></title>
+    <link href="http://mc-stan.org/getting-started/"/>
+    <updated>2012-08-24T12:50:00-04:00</updated>
+    <id>http://mc-stan.org/getting-started</id>
+    <content type="html"><![CDATA[<p>RStan is the <a href="http://R-project.org">R</a> interface for <a href="http://mc-stan.org">Stan</a>. This howto includes how to install RStan, and how to use RStan.</p>
+
+<!-- more -->
+
+
+<h2>Prerequisites</h2>
+
+<h3>R</h3>
+
+<p>Obviously we need <a href="http://R-project.org">R</a>. In particular, R version 2.15.1 is needed. This is because one package that RStan depends on
+requires R 2.15.1.</p>
+
+<h3>Other R packages</h3>
+
+<p>As an R package, rstan depends directly on packages <a href="http://cran.r-project.org/web/packages/Rcpp/index.html">Rcpp</a>, <a href="http://cran.r-project.org/web/packages/RcppEigen/index.html">RcppEigen</a>, and <a href="http://cran.r-project.org/web/packages/inline/index.html">inline</a>.  So before installing rstan, these packages need to be installed:</p>
+
+<figure class='code'><figcaption><span>Install Required Packages</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>install.packages<span class="p">(</span>c<span class="p">(</span><span class="s">&quot;inline&quot;</span><span class="p">,</span> <span class="s">&quot;Rcpp&quot;</span><span class="p">,</span> <span class="s">&quot;RcppEigen&quot;</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>C++ compiler</h3>
+
+<p>The same as Stan, RStan requires a C++ compiler that can be accessed by R. See Stan&#8217;s manual on how to install a C++ compiler on the platform of interest. In short, a C++ compiler for Mac/Windows/Linux can be obtained using the following information.
+* Mac: <a href="https://developer.apple.com/xcode/">Xcode</a> from Apple<br/>
+* Windows: GCC in <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a>
+* Linux: GCC or Clang. Generally it is easy to use a package management tool in your Linux distribution such as <em>apt</em> on Debian (or Debian based) and <em>yum</em> on Fedora (or Fedora based). For example, use <code>apt-get install build-essential</code> on Debian.</p>
+
+<p>We can use the following R code to see if there is a C++ compiler that can be used by R.</p>
+
+<figure class='code'><figcaption><span>using inline to compile C++ code on the fly</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>library<span class="p">(</span>inline<span class="p">)</span>
+</span><span class='line'>library<span class="p">(</span>Rcpp<span class="p">)</span>
+</span><span class='line'>src <span class="o">&lt;-</span> <span class="s">&#39; </span>
+</span><span class='line'><span class="s">  std::vector&lt;std::string&gt; s; </span>
+</span><span class='line'><span class="s">  s.push_back(&quot;hello&quot;);</span>
+</span><span class='line'><span class="s">  s.push_back(&quot;world&quot;);</span>
+</span><span class='line'><span class="s">  return Rcpp::wrap(s);</span>
+</span><span class='line'><span class="s">&#39;</span>
+</span><span class='line'>hellofun <span class="o">&lt;-</span> cxxfunction<span class="p">(</span>body <span class="o">=</span> src<span class="p">,</span> includes <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>                        plugin <span class="o">=</span> <span class="s">&#39;Rcpp&#39;</span><span class="p">,</span> verbose <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span>
+</span><span class='line'>cat<span class="p">(</span>hellofun<span class="p">(),</span> <span class="s">&#39;\n&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you run the above lines in R and you have C++, you&#8217;ll get <code>hello world</code> to appear in your R console.</p>
+
+<h4>Modify C++ compiler optimization level</h4>
+
+<p>This is optional. But changing the optimization level for compiling models can improve the speed of sampling.
+We could change it as follows:</p>
+
+<p>Run the following R code in R, to obtain the full path of file <code>Makeconf</code></p>
+
+<figure class='code'><figcaption><span>Find the Makeconf that R uses</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>file.path<span class="p">(</span>R.home<span class="p">(</span>component <span class="o">=</span> <span class="s">&#39;etc&#39;</span><span class="p">),</span> <span class="m">.</span>Platform<span class="p">$</span>r_arch<span class="p">,</span> <span class="s">&#39;Makeconf&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">## [1] &quot;/Library/Frameworks/R.framework/Resources/etc/x86_64/Makeconf&quot; ## on OS X</span>
+</span><span class='line'><span class="c1">## [1] &quot;/usr/lib64/R/etc//Makeconf&quot; ## on Ubuntu</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Look for the line beginning with <code>CXXFLAGS</code> in file <em>Makeconf</em>, it might look like (it can be a little different depending on platforms)</p>
+
+<figure class='code'><figcaption><span>Change this line in file you found above</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='make'><span class='line'><span class="nv">CXXFLAGS</span> <span class="o">=</span> -g -O2 <span class="k">$(</span>LTO<span class="k">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Change the above <code>-O2</code> to <code>-O3</code></p>
+
+<h1>How to Install RStan</h1>
+
+<p>Currently, RStan is not on <a href="http://cran.r-project.org/">CRAN</a>, a different <code>repos</code> for
+<code>install.packages</code> can be used to install rstan.  That is, instead we call
+<code>install.packages</code> to install rstan <em>from source</em>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'><span class="c1">## add current repository of rstan</span>
+</span><span class='line'>options<span class="p">(</span>repos <span class="o">=</span> c<span class="p">(</span>getOption<span class="p">(</span><span class="s">&quot;repos&quot;</span><span class="p">),</span> rstan <span class="o">=</span> <span class="s">&quot;http://wiki.stan.googlecode.com/git/R&quot;</span><span class="p">))</span>
+</span><span class='line'>install.packages<span class="p">(</span><span class="s">&#39;rstan&#39;</span><span class="p">,</span> type <span class="o">=</span> <span class="s">&#39;source&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>Install using &#8216;contriburl&#8217; instead of &#8216;repos&#8217;</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>install.packages<span class="p">(</span><span class="s">&#39;rstan&#39;</span><span class="p">,</span> contrib <span class="o">=</span> <span class="s">&#39;http://wiki.stan.googlecode.com/git/R/bin/macosx/leopard/contrib/2.15/&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In addition, if the binary version of package rstan is not available, we can explicitly install the package from source as follows.</p>
+
+<figure class='code'><figcaption><span>Set a package repository</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>options<span class="p">(</span>repos <span class="o">=</span> c<span class="p">(</span>getOption<span class="p">(</span><span class="s">&quot;repos&quot;</span><span class="p">),</span> rstan <span class="o">=</span> <span class="s">&quot;http://wiki.stan.googlecode.com/git/R&quot;</span><span class="p">))</span>
+</span><span class='line'>install.packages<span class="p">(</span><span class="s">&#39;rstan&#39;</span><span class="p">,</span> type <span class="o">=</span> <span class="s">&#39;source&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>How to Use RStan</h1>
+
+<h3>Load rstan</h3>
+
+<p>The package names is <em>rstan</em>, so we need to use <code>library(rstan)</code> to load the package.</p>
+
+<figure class='code'><figcaption><span>Load the rstan package</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>library<span class="p">(</span>rstan<span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Example 1: The Eight Schools</h3>
+
+<p>This is an example in Section 5.5 of Gelman <em>et al</em> (2003), which studied
+coaching effects from eight schools. For simplicity, we call this exmaple
+&#8220;eight schools.&#8221;</p>
+
+<figure class='code'><figcaption><span>Eight Schools</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>schools.code <span class="o">&lt;-</span> <span class="s">&#39;</span>
+</span><span class='line'><span class="s">  data {</span>
+</span><span class='line'><span class="s">    int&lt;lower=0&gt; J; // number of schools </span>
+</span><span class='line'><span class="s">    real y[J]; // estimated treatment effects</span>
+</span><span class='line'><span class="s">    real&lt;lower=0&gt; sigma[J]; // s.e. of effect estimates </span>
+</span><span class='line'><span class="s">  } </span>
+</span><span class='line'><span class="s">  parameters {</span>
+</span><span class='line'><span class="s">    real theta[J]; </span>
+</span><span class='line'><span class="s">    real mu; </span>
+</span><span class='line'><span class="s">    real&lt;lower=0&gt; tau; </span>
+</span><span class='line'><span class="s">  } </span>
+</span><span class='line'><span class="s">  model {</span>
+</span><span class='line'><span class="s">    theta ~ normal(mu, tau); </span>
+</span><span class='line'><span class="s">    y ~ normal(theta, sigma);</span>
+</span><span class='line'><span class="s">  } </span>
+</span><span class='line'><span class="s">&#39;</span>
+</span><span class='line'>
+</span><span class='line'>schools.dat <span class="o">&lt;-</span> list<span class="p">(</span>J <span class="o">=</span> <span class="m">8</span><span class="p">,</span>
+</span><span class='line'>                    y <span class="o">=</span> c<span class="p">(</span><span class="m">28</span><span class="p">,</span>  <span class="m">8</span><span class="p">,</span> <span class="m">-3</span><span class="p">,</span>  <span class="m">7</span><span class="p">,</span> <span class="m">-1</span><span class="p">,</span>  <span class="m">1</span><span class="p">,</span> <span class="m">18</span><span class="p">,</span> <span class="m">12</span><span class="p">),</span>
+</span><span class='line'>                    sigma <span class="o">=</span> c<span class="p">(</span><span class="m">15</span><span class="p">,</span> <span class="m">10</span><span class="p">,</span> <span class="m">16</span><span class="p">,</span> <span class="m">11</span><span class="p">,</span>  <span class="m">9</span><span class="p">,</span> <span class="m">11</span><span class="p">,</span> <span class="m">10</span><span class="p">,</span> <span class="m">18</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'>fit <span class="o">&lt;-</span> stan<span class="p">(</span>model.code <span class="o">=</span> schools.code<span class="p">,</span> data <span class="o">=</span> schools.dat<span class="p">,</span>
+</span><span class='line'>            n.iter <span class="o">=</span> <span class="m">1000</span><span class="p">,</span> n.chains <span class="o">=</span> <span class="m">4</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>In this example, we can also store the model&#8217;s Stan code
+in a file, or we can download <a href="http://wiki.stan.googlecode.com/git/rstangettingstarted/8schools.stan">8schools.stan</a> (reproduced below) to our working
+directory and use the following usage of function <code>stan</code> instead.</p>
+
+<figure class='code'><figcaption><span>8schools.stan </span><a href='http://wiki.stan.googlecode.com/git/rstangettingstarted/8schools.stan'>link</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='stan'><span class='line'><span class="kn">data</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kt">int</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">J</span><span class="p">;</span> <span class="c1">// number of schools </span>
+</span><span class='line'>    <span class="kt">real</span> <span class="n">y</span><span class="p">[</span><span class="n">J</span><span class="p">];</span> <span class="c1">// estimated treatment effects</span>
+</span><span class='line'>    <span class="kt">real</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">sigma</span><span class="p">[</span><span class="n">J</span><span class="p">];</span> <span class="c1">// s.e. of effect estimates </span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="kn">parameters</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kt">real</span> <span class="n">theta</span><span class="p">[</span><span class="n">J</span><span class="p">];</span>
+</span><span class='line'>    <span class="kt">real</span> <span class="n">mu</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">real</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">tau</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="kn">model</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">theta</span> <span class="o">~</span> <span class="nb">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">tau</span><span class="p">);</span>
+</span><span class='line'>    <span class="n">y</span> <span class="o">~</span> <span class="nb">normal</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">sigma</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>using an external file</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>fit1 <span class="o">&lt;-</span> stan<span class="p">(</span>file <span class="o">=</span> <span class="s">&#39;8schools.stan&#39;</span><span class="p">,</span> data <span class="o">=</span> schools.dat<span class="p">,</span>
+</span><span class='line'>             n.iter <span class="o">=</span> <span class="m">1000</span><span class="p">,</span> n.chains <span class="o">=</span> <span class="m">4</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Once a model is fitted, we can use the fitted result as an input to
+fit the model with other data or settings. This would save us time
+of compiling the C++ code for the model. By specifying parameter
+<code>fit</code> for function <code>stan</code>, we can fit the model again. For example,
+if we want to sample more iterations, we can proceed as follows.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>fit2 <span class="o">&lt;-</span> stan<span class="p">(</span>fit <span class="o">=</span> fit1<span class="p">,</span> data <span class="o">=</span> schools.dat<span class="p">,</span> n.iter <span class="o">=</span> <span class="m">10000</span><span class="p">,</span> n.chains <span class="o">=</span> <span class="m">4</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In addition, as in BUGS (or JAGS), Stan (different from RStan here) needs all the data to be in an R dump file. In the case we have this file, rstan provides function <code>read.rdump</code> to read all the data into an R list.  For example, we have a file named <em>8schools.rdump</em> that contains the following text in our working directory.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>J <span class="o">&lt;-</span> <span class="m">8</span>
+</span><span class='line'>y <span class="o">&lt;-</span> c<span class="p">(</span><span class="m">28</span><span class="p">,</span>  <span class="m">8</span><span class="p">,</span> <span class="m">-3</span><span class="p">,</span>  <span class="m">7</span><span class="p">,</span> <span class="m">-1</span><span class="p">,</span>  <span class="m">1</span><span class="p">,</span> <span class="m">18</span><span class="p">,</span> <span class="m">12</span><span class="p">)</span>
+</span><span class='line'>sigma_y <span class="o">&lt;-</span> c<span class="p">(</span><span class="m">15</span><span class="p">,</span> <span class="m">10</span><span class="p">,</span> <span class="m">16</span><span class="p">,</span> <span class="m">11</span><span class="p">,</span>  <span class="m">9</span><span class="p">,</span> <span class="m">11</span><span class="p">,</span> <span class="m">10</span><span class="p">,</span> <span class="m">18</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then we can read the data from &#8220;8schools.rdump&#8221; as follows.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>schools.dat <span class="o">&lt;-</span> read.rdump<span class="p">(</span><span class="s">&#39;8schools.rdump&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The R dump file actually can be sourced using function <code>source</code> in R, which however by default would
+read all the data into the global environment. In this case, we can specify the data for function <code>stan</code> using
+object names. That is,</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>source<span class="p">(</span><span class="s">&#39;8schools.rdump&#39;</span><span class="p">)</span>
+</span><span class='line'>fit <span class="o">&lt;-</span> stan<span class="p">(</span>file <span class="o">=</span> <span class="s">&#39;8schools.stan&#39;</span><span class="p">,</span> data <span class="o">=</span> c<span class="p">(</span><span class="s">&quot;J&quot;</span><span class="p">,</span> <span class="s">&quot;y&quot;</span><span class="p">,</span> <span class="s">&quot;sigma_y&quot;</span><span class="p">),</span>
+</span><span class='line'>            n.iter <span class="o">=</span> <span class="m">1000</span><span class="p">,</span> n.chains <span class="o">=</span> <span class="m">4</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Example 2: The Rats</h3>
+
+<p>The Rats example is also a popular example. For example, we can find the <a href="http://www.openbugs.info">OpenBUGS</a> version <a href="http://www.openbugs.info/Examples/Rats.html">here</a>, which originally is from Gelfand <em>et al</em> (1990).
+The data are about the growth of 30 rats weekly for five weeks.
+In the linked data <a href="http://wiki.stan.googlecode.com/git/rstangettingstarted/rats.txt">rats.txt</a>, we list the data, in which we use <em>x</em> to denote the dates
+the data were collected.</p>
+
+<figure class='code'><figcaption><span>rats.stan  </span><a href='http://stan.googlecode.com/git/src/models/bugs_examples/vol1/rats/rats.stan'>link</a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='stan'><span class='line'><span class="c1">// http://www.mrc-bsu.cam.ac.uk/bugs/winbugs/Vol1.pdf</span>
+</span><span class='line'><span class="c1">// Page 3: Rats</span>
+</span><span class='line'><span class="kn">data</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kt">int</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">N</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">int</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="kr">T</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">real</span> <span class="n">x</span><span class="p">[</span><span class="kr">T</span><span class="p">];</span>
+</span><span class='line'>  <span class="kt">real</span> <span class="n">y</span><span class="p">[</span><span class="n">N</span><span class="p">,</span><span class="kr">T</span><span class="p">];</span>
+</span><span class='line'>  <span class="kt">real</span> <span class="n">xbar</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kn">parameters</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kt">real</span> <span class="n">alpha</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+</span><span class='line'>  <span class="kt">real</span> <span class="n">beta</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kt">real</span> <span class="n">mu_alpha</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">real</span> <span class="n">mu_beta</span><span class="p">;</span>          <span class="c1">// beta.c in original bugs model</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kt">real</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">sigmasq_y</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">real</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">sigmasq_alpha</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">real</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">sigmasq_beta</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kn">transformed parameters</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kt">real</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">sigma_y</span><span class="p">;</span>       <span class="c1">// sigma in original bugs model</span>
+</span><span class='line'>  <span class="kt">real</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">sigma_alpha</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">real</span><span class="err">&lt;</span><span class="n">lower</span><span class="err">=</span><span class="mi">0</span><span class="err">&gt;</span> <span class="n">sigma_beta</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">sigma_y</span> <span class="o">&lt;-</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">sigmasq_y</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">sigma_alpha</span> <span class="o">&lt;-</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">sigmasq_alpha</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">sigma_beta</span> <span class="o">&lt;-</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">sigmasq_beta</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kn">model</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">mu_alpha</span> <span class="o">~</span> <span class="nb">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">mu_beta</span> <span class="o">~</span> <span class="nb">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">sigmasq_y</span> <span class="o">~</span> <span class="nb">inv_gamma</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">sigmasq_alpha</span> <span class="o">~</span> <span class="nb">inv_gamma</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">sigmasq_beta</span> <span class="o">~</span> <span class="nb">inv_gamma</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">alpha</span> <span class="o">~</span> <span class="nb">normal</span><span class="p">(</span><span class="n">mu_alpha</span><span class="p">,</span> <span class="n">sigma_alpha</span><span class="p">);</span> <span class="c1">// vectorized</span>
+</span><span class='line'>  <span class="n">beta</span> <span class="o">~</span> <span class="nb">normal</span><span class="p">(</span><span class="n">mu_beta</span><span class="p">,</span> <span class="n">sigma_beta</span><span class="p">);</span>  <span class="c1">// vectorized</span>
+</span><span class='line'>  <span class="kr">for</span> <span class="p">(</span><span class="n">n</span> <span class="kr">in</span> <span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">)</span>
+</span><span class='line'>    <span class="kr">for</span> <span class="p">(</span><span class="n">t</span> <span class="kr">in</span> <span class="mi">1</span><span class="p">:</span><span class="kr">T</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">y</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">t</span><span class="p">]</span> <span class="o">~</span> <span class="nb">normal</span><span class="p">(</span><span class="n">alpha</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="n">beta</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">-</span> <span class="n">xbar</span><span class="p">),</span> <span class="n">sigma_y</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kn">generated quantities</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kt">real</span> <span class="n">alpha0</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">alpha0</span> <span class="o">&lt;-</span> <span class="n">mu_alpha</span> <span class="o">-</span> <span class="n">xbar</span> <span class="o">*</span> <span class="n">mu_beta</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span>R code to run the Rats model</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='r'><span class='line'>library<span class="p">(</span>rstan<span class="p">)</span>
+</span><span class='line'>y <span class="o">&lt;-</span> read.table<span class="p">(</span><span class="s">&#39;rats.txt&#39;</span><span class="p">,</span> header <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+</span><span class='line'>y <span class="o">&lt;-</span> data.matrix<span class="p">(</span>y<span class="p">)</span>
+</span><span class='line'>x <span class="o">&lt;-</span> c<span class="p">(</span><span class="m">8</span><span class="p">,</span> <span class="m">15</span><span class="p">,</span> <span class="m">22</span><span class="p">,</span> <span class="m">29</span><span class="p">,</span> <span class="m">36</span><span class="p">)</span>
+</span><span class='line'>rats.dat <span class="o">&lt;-</span> list<span class="p">(</span>N <span class="o">=</span> nrow<span class="p">(</span>y<span class="p">),</span> <span class="k-Variable">T</span> <span class="o">=</span> ncol<span class="p">(</span>y<span class="p">),</span>
+</span><span class='line'>                 x <span class="o">=</span> x<span class="p">,</span> y <span class="o">=</span> y<span class="p">,</span> xbar <span class="o">=</span> mean<span class="p">(</span>x<span class="p">))</span>
+</span><span class='line'>rats.fit <span class="o">&lt;-</span> stan<span class="p">(</span>file <span class="o">=</span> <span class="s">&#39;rats.stan&#39;</span><span class="p">,</span> data <span class="o">=</span> rats.dat<span class="p">,</span> verbose <span class="o">=</span> <span class="kc">FALSE</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h1>Need More Help?</h1>
+
+<p>More details about RStan can be found in the documentation including the vignette of package rstan.
+For example, using <code>help(stan)</code> and <code>help("stanfit-class")</code> to check out the help for function <code>stan</code>
+and S4 class <code>stanfit</code>.<br/>
+And see Stan&#8217;s manual for details about Stan and Stan modeling language.</p>
+
+<h2>Reference</h2>
+
+<ul>
+<li>Gelman, A., Carlin, J. B., Stern, H. S., and Rubin, D. B. (2003). <em>Bayesian Data Analysis</em>, CRC Press, London, 2nd Edition.</li>
+<li>The Stan Development Team (2012).  <a href="http://stan.googlecode.com/files/stan-reference.pdf">Stan Modeling Language: User&#8217;s Guide and Reference</a>.</li>
+<li>Gelfand, A. E., Hills S. E., Racine-Poon, A., and Smith A. F. M. (1990). &#8220;Illustration of Bayesian Inference in Normal Data Models Using Gibbs Sampling&#8221;, Journal of the American Statistical Association, 85, 972-985.</li>
+<li><a href="http://mc-stan.org">Stan</a></li>
+<li><a href="http://R-project.org">R</a></li>
+<li><a href="http://www.mrc-bsu.cam.ac.uk/bugs/">BUGS</a></li>
+<li><a href="http://www.openbugs.info">OpenBUGS</a></li>
+<li><a href="http://mcmc-jags.sourceforge.net/">JAGS</a></li>
+<li><a href="http://cran.r-project.org/web/packages/Rcpp/index.html">Rcpp</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Command-line Quick Start]]></title>
+    <link href="http://mc-stan.org/command-line-quick-start/"/>
+    <updated>2012-08-23T18:22:00-04:00</updated>
+    <id>http://mc-stan.org/command-line-quick-start</id>
+    <content type="html"><![CDATA[<p>For now, see the getting started chapter in the <a href="http://stan.googlecode.com/files/stan-reference.pdf">Stan Modeling Language User&#8217;s Guide and Reference Manual</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[C++ Quick Start]]></title>
+    <link href="http://mc-stan.org/c-plus-plus-quick-start/"/>
+    <updated>2012-08-23T18:22:00-04:00</updated>
+    <id>http://mc-stan.org/c-plus-plus-quick-start</id>
+    <content type="html"><![CDATA[<p>For now, see the getting started chapter in the <a href="http://stan.googlecode.com/files/stan-reference.pdf">Stan Modeling Language User&#8217;s Guide and Reference Manual</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Development Team]]></title>
+    <link href="http://mc-stan.org/development-team/"/>
+    <updated>2012-08-23T18:02:00-04:00</updated>
+    <id>http://mc-stan.org/development-team</id>
+    <content type="html"><![CDATA[<h3>Stan is a Team Effort</h3>
+
+
+
+
+<p>Core contributors to Stan&#8217;s design, implementation,
+and testing, in order of joining:</p>
+
+
+<!--more-->
+
+
+<ul>
+  <li>
+  <a href="http://www.stat.columbia.edu/~gelman/">Andrew Gelman</a>
+  &nbsp; <span style="font-size:95%">(Columbia University)</span>
+  </li>
+  <li>
+  <a href="http://colloquial.com/carp">Bob Carpenter</a>
+  &nbsp; <span style="font-size:95%">(Columbia University)</span>
+  </li>
+  <li>
+  <a href="http://www.cs.princeton.edu/~mdhoffma/">Matt Hoffman</a>
+  &nbsp; <span style="font-size:95%">(Adobe Creative Technologies Lab)</span>
+  </li>
+  <li>
+  Daniel Lee
+  &nbsp; <span style="font-size:95%">(Columbia University)</span>
+  </li>
+  <li>
+  <a
+  href="http://www.linkedin.com/pub/michael-malecki/15/a16/84a">Michael Malecki</a>
+  &nbsp; <span style="font-size:95%">(YouGov America)</span>
+  </li>
+  <li><a href="http://www.columbia.edu/~bg2382/">Ben Goodrich</a>
+  &nbsp; <span style="font-size:95%">(Columbia University)</span>
+  </li>
+  <li>
+  <a href="http://web.mit.edu/~betan/www/cv.html">Michael Betancourt</a>
+  &nbsp; <span style="font-size:95%">(Adaptly)</span>
+  </li>
+  <li>
+  <a href="http://www.cs.toronto.edu/~mbrubake/">Marcus Brubaker</a>
+  &nbsp; <span style="font-size:95%">(University of Toronto)</span>
+  </li>
+  <li>
+  <a
+  href="http://www.linkedin.com/pub/jiqiang-guo/9/4b2/a54">Jiqiang Guo</a>
+  &nbsp; <span style="font-size:95%">(Columbia University)</span>
+  </li>
+</ul>
+
+
+
+
+<h2>Join the Team</h2>
+
+
+<p>For more info on how join the
+the development team, see <a href="http://mc-stan.org/contribute">how to contribute to Stan</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Bug Reports &amp; Feature Requests]]></title>
+    <link href="http://mc-stan.org/bug-reports-and-feature-requests/"/>
+    <updated>2012-08-23T17:53:00-04:00</updated>
+    <id>http://mc-stan.org/bug-reports-and-feature-requests</id>
+    <content type="html"><![CDATA[<p>Found a bug? Want a feature Stan doesn&#8217;t have yet? Here&#8217;s how to report it to the team.</p>
+
+<!-- more -->
+
+
+<p></p>
+
+<h3>Reporting Bugs</h3>
+
+<p>To report bugs, please use the Stan <a href="http://code.google.com/p/stan/issues/list">Issue Tracker</a>.
+To make it as easy as possible for us to help you, please provide as much context as possible, including the version of RStan and R, C++ compiler version, and operating system (including bit size and memory).</p>
+
+<h3>Requesting Features</h3>
+
+<p>To formally request a new feature for Stan, please also use the Stan <a href="http://code.google.com/p/stan/issues/list">Issue Tracker</a>.
+Before requesting a feature, please browse the current list of feature requests on the most recent Stan  <a href="https://code.google.com/p/stan/source/browse/TO-DO.txt">to-do list</a>.</p>
+
+<p>We informally discuss feature requests on both the user&#8217;s and developer&#8217;s <a href="http://mc-stan.org/mailing-lists/">mailing lists</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Contribute Code & Models]]></title>
+    <link href="http://mc-stan.org/contribute/"/>
+    <updated>2012-08-23T17:40:00-04:00</updated>
+    <id>http://mc-stan.org/contribute</id>
+    <content type="html"><![CDATA[<p>Stan is open source because we want your feedback to help make Stan&#8217;s code and documentation better.</p>
+
+<!-- more -->
+
+
+<h2>Contribute Code Patches</h2>
+
+<p>If you&#8217;d like to contribute a bug patch, please submit a Git patch or Git pull request either on the user&#8217;s or developer&#8217;s <a href="http://mc-stan.org/mailing-lists/">mailing list</a> or through the issue tracker.</p>
+
+<p>Contribute Models and Data
+We&#8217;re still discussing how to support user-contributed models. The issues to sort out are</p>
+
+<ol>
+<li>how to vet the models to make sure they work,</li>
+<li>how to handle intellectual property and licensing, and</li>
+<li>how to store and distribute them.
+If you have suggestions, let us know on the <a href="http://mc-stan.org/mailing-lists/">mailing list</a>.</li>
+</ol>
+
+
+<h2>Join the Development Team</h2>
+
+<p>We&#8217;re always on the lookout for new developers willing to get their hands dirty with C++ design, coding, documentation, testing, and maintenance.</p>
+
+<p>The most up-to-date list of work is on the <a href="https://code.google.com/p/stan/source/browse/TO-DO.txt">to-do list</a>.
+The current list of bugs and feature requests is available from the <a href="http://mc-stan.org/bugs-features.html">issue tracker</a>.</p>
+
+<p>If you&#8217;d like to join the development team and get commit access to the Stan code repository, please let us know by first requesting to join the developer&#8217;s mailing list.</p>
+
+<p>Please include a brief description of your programming background and what you&#8217;d like to contribute.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Bibtex Citations]]></title>
+    <link href="http://mc-stan.org/bibtex-citations/"/>
+    <updated>2012-08-23T17:40:00-04:00</updated>
+    <id>http://mc-stan.org/bibtex-citations</id>
+    <content type="html"><![CDATA[<p>Bibtex citations for the software, manual, and sampler.</p>
+
+<!-- more -->
+
+
+<h3>Software</h3>
+
+<pre>
+@misc{stan-software:2012,
+    author = ,
+    year = 2012,
+    title = {Stan: A C++ Library for Probability
+             and Sampling, Version 1.0},
+    url = {http://mc-stan.org/}
+}
+</pre>
+
+
+<h3>Manual</h3>
+
+<pre>
+@manual{stan-manual:2012,
+    author = ,
+    year = 2012,
+    title = {Stan Modeling Language User's Guide and
+             Reference Manual, Version 1.0},
+    url = {http://mc-stan.org/}
+</pre>
+
+
+<h3>Sampler</h3>
+
+<pre>
+@article{hoffman-gelman:2012,
+    author = {Matthew D. Hoffman and Andrew Gelman},
+    year = {In press},
+    title = {The No-{U}-Turn Sampler: Adaptively Setting Path 
+             Lengths in {H}amiltonian {M}onte {C}arlo},
+    journal = {Journal of Machine Learning Research}
+}
+</pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Mailing Lists]]></title>
+    <link href="http://mc-stan.org/mailing-lists/"/>
+    <updated>2012-08-23T17:31:00-04:00</updated>
+    <id>http://mc-stan.org/mailing-lists</id>
+    <content type="html"><![CDATA[<p>Because our team is distributed geographically, almost all of our
+discussion of Stan takes place on our mailing lists.</p>
+
+<!--more-->
+
+
+<h3>User&#8217;s List</h3>
+
+<p>To discuss the use of Stan, post examples or ask questions about Stan, use the
+<a href="https://groups.google.com/forum/?fromgroups#!forum/stan-users">Stan User&#8217;s Mailing List</a>.</p>
+
+<h3>Announcement List</h3>
+
+<p>Release announcements are on a separate low-volume list, the
+<a href="https://groups.google.com/forum/?fromgroups#!forum/stan-announce">Stan Announcement Mailing List</a>.</p>
+
+<h3>Developer&#8217;s List</h3>
+
+<p>To discuss the design, coding, testing, and maintenance of
+Stan, use the <a href="https://groups.google.com/forum/?fromgroups#!forum/stan-dev">Stan Developer&#8217;s Mailing List</a>.</p>
+
+<blockquote><p>General discussions of Stan should be on the user&#8217;s list, including questions about implementation.
+When requesting to join the developer&#8217;s list, please provide an explanation in the form provided on the signup form.</p></blockquote>
+
+<h3>Buildbot List</h3>
+
+<p>Stan uses a continuous build process.  To receive mail about
+integration test failures, sign up for the
+ <a href="https://groups.google.com/forum/?fromgroups#!forum/stan-buildbot">Stan Buildbot Mailing List</a>.</p>
+]]></content>
+  </entry>
+  
+</feed>
