@@ -1,0 +1,21 @@
+---
+layout: post
+title: "Download"
+date: 2012-08-24 13:48
+comments: true
+categories: 
+---
+## [Latest](http://stangooglecodelink) (Stan 1.0.0)
+## [RStan](/getting-started)
+### Licensing
+ - Stan is licensed under the [new BSD] license 
+ - RStan is licensed under the [GPLv3] license
+ - Stan depends on Eigen ([MPL]) and Boost ([Boost license]).
+ - Stan and RStan are copyrighted by the [Stan Development Team]
+
+ [new BSD]: http://opensource.org/licenses/bsd-license.php
+ [GPLv3]: http://gplv3.fsf.org
+ [MPL]: http://www.mozilla.org/MPL/
+ [Boost]: http://boost.org
+ [Boost license]: http://www.boost.org/users/license.html
+ [Stan Development Team]: /team
