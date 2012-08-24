@@ -11,6 +11,7 @@ body > header {
   h2 {
     margin: .2em 0 0;
     @extend .sans;
+    font-face: "Helvetica Neue", "Helvetica", Arial, sans-serif;
     font-size: 1em;
     color: $subtitle-color;
     font-weight: normal;

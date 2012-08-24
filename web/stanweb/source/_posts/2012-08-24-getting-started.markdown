@@ -27,9 +27,10 @@ install.packages(c("inline", "Rcpp", "RcppEigen"))
 ### C++ compiler 
 
 The same as Stan, RStan requires a C++ compiler that can be accessed by R. See Stan's manual on how to install a C++ compiler on the platform of interest. In short, a C++ compiler for Mac/Windows/Linux can be obtained using the following information. 
-* Mac: [Xcode] from Apple  
-* Windows: GCC in [Rtools]
-* Linux: GCC or Clang. Generally it is easy to use a package management tool in your Linux distribution such as _apt_ on Debian (or Debian based) and _yum_ on Fedora (or Fedora based). For example, use `apt-get install build-essential` on Debian.
+
+- **Mac OS X** [Xcode] from Apple  
+- **Windows** GCC in [Rtools]
+- **Linux** GCC or Clang. Generally it is easy to use a package management tool in your Linux distribution such as _apt_ on Debian (or Debian based) and _yum_ on Fedora (or Fedora based). For example, use `apt-get install build-essential` on Debian.
 
 We can use the following R code to see if there is a C++ compiler that can be used by R. 
 

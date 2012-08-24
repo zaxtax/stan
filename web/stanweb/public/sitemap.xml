@@ -2,46 +2,46 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://mc-stan.org/mailing-lists/</loc>
-        <lastmod>2012-08-23T17:43:57-04:00</lastmod>
+        <lastmod>2012-08-23T21:18:47-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/bibtex-citations/</loc>
-        <lastmod>2012-08-23T17:47:04-04:00</lastmod>
+        <lastmod>2012-08-23T21:18:47-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/contribute/</loc>
-        <lastmod>2012-08-23T18:00:06-04:00</lastmod>
+        <lastmod>2012-08-23T21:18:47-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/bug-reports-and-feature-requests/</loc>
-        <lastmod>2012-08-23T17:56:36-04:00</lastmod>
+        <lastmod>2012-08-23T21:18:47-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/development-team/</loc>
-        <lastmod>2012-08-23T18:04:59-04:00</lastmod>
+        <lastmod>2012-08-23T21:18:47-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/c-plus-plus-quick-start/</loc>
-        <lastmod>2012-08-23T18:25:03-04:00</lastmod>
+        <lastmod>2012-08-23T21:18:47-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/command-line-quick-start/</loc>
-        <lastmod>2012-08-23T18:25:14-04:00</lastmod>
+        <lastmod>2012-08-23T21:18:47-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/getting-started/</loc>
-        <lastmod>2012-08-23T18:13:26-04:00</lastmod>
+        <lastmod>2012-08-23T21:42:08-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/download/</loc>
-        <lastmod>2012-08-23T18:19:14-04:00</lastmod>
+        <lastmod>2012-08-23T21:18:47-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/blog/archives/</loc>
-        <lastmod>2012-08-23T18:27:12-04:00</lastmod>
+        <lastmod>2012-08-23T21:42:08-04:00</lastmod>
     </url>
     <url>
         <loc>http://mc-stan.org/</loc>
-        <lastmod>2012-08-23T18:25:14-04:00</lastmod>
+        <lastmod>2012-08-23T21:42:08-04:00</lastmod>
     </url>
 </urlset>
