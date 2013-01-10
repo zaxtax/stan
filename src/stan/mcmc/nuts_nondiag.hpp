@@ -131,7 +131,7 @@ namespace stan {
           _maxdepth(maxdepth),
           _lastdepth(-1),
           _x_sum_n(0),
-          _next_diag_adapt(20 + model.num_params_r()),
+          _next_diag_adapt(20 + model.num_params_r())
           //_drop_warm(10)
           //_x_mat(&(this->_x[0]), (this->_x).size())
       {
