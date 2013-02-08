@@ -2485,7 +2485,7 @@ namespace stan {
         o_ << "writer__.comma();" << EOL;  // only writes comma after first call
 
         generate_indent(2 + combo_dims.size(),o_);
-        o_ << "o__ << \"" << name << '"';
+        o_ << "*o__ << \"" << name << '"';
         for (size_t i = 0; i < combo_dims.size(); ++i)
           o_ << " << '.' << k_" << i << "__";
         o_ << ';' << EOL;
@@ -2502,8 +2502,10 @@ namespace stan {
     void generate_write_unconstrained_csv_header_method(const program& prog,
                                           std::ostream& o) {
       write_unconstrained_csv_header_visgen vis(o);
-      o << EOL << INDENT << "void write_unconstrained_csv_header(std::ostream& o__) {" << EOL;
-      o << INDENT2 << "stan::io::csv_writer writer__(o__);" << EOL;
+      o << EOL << INDENT << "void write_unconstrained_csv_header(std::ostream* o__) {" << EOL;
+      o << INDENT2 << "if (o__ == 0)" << EOL;
+      o << INDENT3 << "return;" << EOL;
+      o << INDENT2 << "stan::io::csv_writer writer__(*o__);" << EOL;
 
       // parameters
       for (size_t i = 0; i < prog.parameter_decl_.size(); ++i) {

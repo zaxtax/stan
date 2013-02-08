@@ -199,9 +199,11 @@ namespace stan {
        */
       virtual void write_unconstrained_csv(std::vector<double>& params_r,
 					   std::vector<int>& params_i,
-					   std::ostream& o,
-					   std::ostream* /*output_stream = 0*/) {
-	stan::io::csv_writer writer(o);
+					   std::ostream* o,
+					   std::ostream* output_stream = 0) {
+	if (o == 0)
+	  return;
+	stan::io::csv_writer writer(*o);
         for (size_t i = 0; i < params_r.size(); ++i)
           writer.write(params_r[i]);
 	for (size_t i = 0; i < params_i.size(); ++i)
