@@ -2391,13 +2391,13 @@ namespace stan {
 
     // this goes with write_unconstrained_csv_header_visgen.
     // sets the int val to the original value minus 1.
+    // FIXME: does this cover enough?
     struct int_minus_1_vis : public boost::static_visitor<void> {
-      void operator()(int_literal& x) { x.val_--; }
-
       void operator()(nil& /*x*/) {}
-      void operator()(double_literal& /*x*/) {}
-      void operator()(array_literal& /*x*/) {}
-      void operator()(variable& /*x*/) {}
+      void operator()(int_literal& x) { x.val_--; }
+      void operator()(double_literal& x) { x.val_--; }
+      void operator()(array_literal& /*x*/) { }
+      void operator()(variable& x) { x.name_ = x.name_ + "-1"; }
       void operator()(fun& /*x*/) {}
       void operator()(index_op& /*x*/) {}
       void operator()(binary_op& /*x*/) {}
