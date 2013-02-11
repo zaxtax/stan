@@ -2518,14 +2518,6 @@ namespace stan {
       for (size_t i = 0; i < prog.parameter_decl_.size(); ++i) {
         boost::apply_visitor(vis,prog.parameter_decl_[i].decl_);
       }
-      // transformed parameters
-      for (size_t i = 0; i < prog.derived_decl_.first.size(); ++i) {
-        boost::apply_visitor(vis,prog.derived_decl_.first[i].decl_);
-      }
-      // generated quantities
-      for (size_t i = 0; i < prog.generated_decl_.first.size(); ++i) {
-        boost::apply_visitor(vis,prog.generated_decl_.first[i].decl_);
-      }
       o << INDENT << "}" << EOL2;
     }
 
