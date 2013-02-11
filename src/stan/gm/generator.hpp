@@ -2369,9 +2369,9 @@ namespace stan {
     void generate_write_csv_header_method(const program& prog,
                                           std::ostream& o) {
       write_csv_header_visgen vis(o);
-      o << EOL << INDENT << "void write_csv_header(std::ostream& o__) {" << EOL;
+      o << EOL << INDENT << "void write_csv_header(std::ostream& o__, const bool debug) {" << EOL;
       o << INDENT2 << "stan::io::csv_writer writer__(o__);" << EOL;
-
+      
       // parameters
       for (size_t i = 0; i < prog.parameter_decl_.size(); ++i) {
         boost::apply_visitor(vis,prog.parameter_decl_[i].decl_);
@@ -2384,6 +2384,8 @@ namespace stan {
       for (size_t i = 0; i < prog.generated_decl_.first.size(); ++i) {
         boost::apply_visitor(vis,prog.generated_decl_.first[i].decl_);
       }
+      o << INDENT2 << "write_unconstrained_csv_header(o__,debug);" << EOL;
+      
       o << INDENT2 << "writer__.newline();" << EOL;
       o << INDENT << "}" << EOL2;
     }
@@ -2485,7 +2487,7 @@ namespace stan {
         o_ << "writer__.comma();" << EOL;  // only writes comma after first call
 
         generate_indent(2 + combo_dims.size(),o_);
-        o_ << "*o__ << \"" << name << '"';
+        o_ << "o__ << \"" << name << '"';
         for (size_t i = 0; i < combo_dims.size(); ++i)
           o_ << " << '.' << k_" << i << "__";
         o_ << ';' << EOL;
@@ -2502,10 +2504,12 @@ namespace stan {
     void generate_write_unconstrained_csv_header_method(const program& prog,
                                           std::ostream& o) {
       write_unconstrained_csv_header_visgen vis(o);
-      o << EOL << INDENT << "void write_unconstrained_csv_header(std::ostream* o__) {" << EOL;
-      o << INDENT2 << "if (o__ == 0)" << EOL;
-      o << INDENT3 << "return;" << EOL;
-      o << INDENT2 << "stan::io::csv_writer writer__(*o__);" << EOL;
+      o << EOL << INDENT << "void write_unconstrained_csv_header(std::ostream& o__, const bool debug) {" << EOL;
+      o << INDENT2 << "if (debug == false)" << EOL
+	<< INDENT3 << "return;" << EOL;
+      
+      o << INDENT2 << "stan::io::csv_writer writer__(o__);" << EOL;
+      o << INDENT2 << "writer__.comma();" << EOL;
 
       // parameters
       for (size_t i = 0; i < prog.parameter_decl_.size(); ++i) {
@@ -2519,7 +2523,6 @@ namespace stan {
       for (size_t i = 0; i < prog.generated_decl_.first.size(); ++i) {
         boost::apply_visitor(vis,prog.generated_decl_.first[i].decl_);
       }
-      o << INDENT2 << "writer__.newline();" << EOL;
       o << INDENT << "}" << EOL2;
     }
 
@@ -2745,6 +2748,7 @@ namespace stan {
                                    std::ostream& o) {
       o << INDENT << "void write_csv(std::vector<double>& params_r__," << EOL;
       o << INDENT << "               std::vector<int>& params_i__," << EOL;
+      o << INDENT << "               bool debug," << EOL;
       o << INDENT << "               std::ostream& o__," << EOL;
       o << INDENT << "               std::ostream* pstream__ = 0) {" << EOL;
       o << INDENT2 << "stan::io::reader<double> in__(params_r__,params_i__);" 
@@ -2800,6 +2804,9 @@ namespace stan {
         boost::apply_visitor(vis_writer, prog.generated_decl_.first[i].decl_);
       if (prog.generated_decl_.first.size() > 0)
         o << EOL;
+
+      generate_comment("DEBUG: write unconstrained parameters",2,o);
+      o << INDENT2 << "write_unconstrained_csv(params_r__,params_i__,debug,o__,pstream__);" << EOL;
 
       o << INDENT2 << "writer__.newline();" << EOL;
       o << INDENT << "}" << EOL2;
@@ -3315,9 +3322,9 @@ namespace stan {
       generate_param_names_method(prog,out);
       generate_dims_method(prog,out);
       generate_write_array_method(prog,model_name,out);
+      generate_write_unconstrained_csv_header_method(prog,out);
       generate_write_csv_header_method(prog,out);
       generate_write_csv_method(prog,model_name,out);
-      generate_write_unconstrained_csv_header_method(prog,out);
       generate_end_class_decl(out);
       generate_end_namespace(out);
       if (include_main) 

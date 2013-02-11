@@ -161,6 +161,34 @@ namespace stan {
       }
 
       /**
+       * Write the unconstrained parameters on a single line in CSV format.
+       * The implementation in this abstract base class writes out the free 
+       * parameters as viwed by HMC.  Subclasses may extend this class and override
+       * this implementation.
+       *
+       * @param params_r Real-valued parameter vector.
+       * @param params_i Integer-valued parameter vector.
+       * @param bool Boolean indicating whether or not to output debug output
+       * @param o Stream to which CSV file is written
+       * @param output_stream Stream to which print statements in Stan
+       * programs are written, default is 0
+       */
+      virtual void write_unconstrained_csv(std::vector<double>& params_r,
+					   std::vector<int>& params_i,
+					   bool debug,
+					   std::ostream& o,
+					   std::ostream* output_stream = 0) {
+	if (debug == false)
+	  return;
+	stan::io::csv_writer writer(o);
+	writer.comma();
+        for (size_t i = 0; i < params_r.size(); ++i)
+          writer.write(params_r[i]);
+	for (size_t i = 0; i < params_i.size(); ++i)
+          writer.write(params_i[i]);
+      }
+
+      /**
        * Write the parameters on a single line in CSV format.  The implementation in
        * this abstract base class writes out the free parameters as
        * viwed by HMC.  Subclasses may extend this class and override
@@ -169,12 +197,14 @@ namespace stan {
        *
        * @param params_r Real-valued parameter vector.
        * @param params_i Integer-valued parameter vector.
+       * @param debug Boolean indicating whether or not to output debug output.
        * @param o Stream to which CSV file is written
        * @param output_stream Stream to which print statements in Stan
        * programs are written, default is 0
        */
       virtual void write_csv(std::vector<double>& params_r,
                              std::vector<int>& params_i,
+			     bool debug,
                              std::ostream& o,
                              std::ostream* /*output_stream = 0*/) {
         stan::io::csv_writer writer(o);
@@ -182,35 +212,9 @@ namespace stan {
           writer.write(params_i[i]);
         for (size_t i = 0; i < params_r.size(); ++i)
           writer.write(params_r[i]);
+	write_unconstrained_csv(params_r, params_i, debug, o);
         writer.newline();
       }
-
-      /**
-       * Write the unconstrained parameters on a single line in CSV format.
-       * The implementation in this abstract base class writes out the free 
-       * parameters as viwed by HMC.  Subclasses may extend this class and override
-       * this implementation.
-       *
-       * @param params_r Real-valued parameter vector.
-       * @param params_i Integer-valued parameter vector.
-       * @param o Stream to which CSV file is written
-       * @param output_stream Stream to which print statements in Stan
-       * programs are written, default is 0
-       */
-      virtual void write_unconstrained_csv(std::vector<double>& params_r,
-					   std::vector<int>& params_i,
-					   std::ostream* o,
-					   std::ostream* output_stream = 0) {
-	if (o == 0)
-	  return;
-	stan::io::csv_writer writer(*o);
-        for (size_t i = 0; i < params_r.size(); ++i)
-          writer.write(params_r[i]);
-	for (size_t i = 0; i < params_i.size(); ++i)
-          writer.write(params_i[i]);
-        writer.newline();
-      }
-
 
       /**
        * Compute the gradient using finite differences for
