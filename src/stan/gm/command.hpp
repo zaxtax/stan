@@ -33,78 +33,80 @@ namespace stan {
 
   namespace gm {
     
-    struct contour_info {
-      contour_info() 
-	: has_contour(false),
-	  idx0(0), min0(0), max0(0),
-	  idx1(0), min1(0), max1(0),
-	  n(0) {}
+    namespace {
+      struct contour_info {
+	contour_info() 
+	  : has_contour(false),
+	    idx0(0), min0(0), max0(0),
+	    idx1(0), min1(0), max1(0),
+	    n(0) {}
 
-      bool has_contour;
-      int idx0;
-      double min0, max0;
-      int idx1;
-      double min1, max1;
-      int n;
+	bool has_contour;
+	int idx0;
+	double min0, max0;
+	int idx1;
+	double min1, max1;
+	int n;
       
-      bool populate(const std::string& contour_string) {
-	has_contour = false;
-	if (contour_string.find("(") != 0)
-	  return false;
-	if (contour_string.find(")") != contour_string.size()-1)
-	  return false;
-	std::stringstream ss(contour_string);
-	if (ss.get() && !(ss >> idx0)) // pop '(', read idx0
-	  return false;
-	if (ss.get() && !(ss >> min0)) // pop ',', read min0
-	  return false;
-	if (ss.get() && !(ss >> max0)) // pop ',', read max0
-	  return false;
-	if (ss.get() && !(ss >> idx1)) // pop ',', read idx1
-	  return false;
-	if (ss.get() && !(ss >> min1)) // pop ',', read min1
-	  return false;
-	if (ss.get() && !(ss >> max1)) // pop ',', read max1
-	  return false;
-	if (ss.get() == ',') {         // if ',', read n, then ')'
-	  if (!(ss >> n) || (ss.get() < 0))
+	bool populate(const std::string& contour_string) {
+	  has_contour = false;
+	  if (contour_string.find("(") != 0)
 	    return false;
-	} else {                       // else set n to default
-	  n = 101;
+	  if (contour_string.find(")") != contour_string.size()-1)
+	    return false;
+	  std::stringstream ss(contour_string);
+	  if (ss.get() && !(ss >> idx0)) // pop '(', read idx0
+	    return false;
+	  if (ss.get() && !(ss >> min0)) // pop ',', read min0
+	    return false;
+	  if (ss.get() && !(ss >> max0)) // pop ',', read max0
+	    return false;
+	  if (ss.get() && !(ss >> idx1)) // pop ',', read idx1
+	    return false;
+	  if (ss.get() && !(ss >> min1)) // pop ',', read min1
+	    return false;
+	  if (ss.get() && !(ss >> max1)) // pop ',', read max1
+	    return false;
+	  if (ss.get() == ',') {         // if ',', read n, then ')'
+	    if (!(ss >> n) || (ss.get() < 0))
+	      return false;
+	  } else {                       // else set n to default
+	    n = 101;
+	  }
+	  if (ss.get() > -1)             // final check to see if the end was reached
+	    return false;
+
+	  has_contour = true;
+	  return true;
 	}
-	if (ss.get() > -1)             // final check to see if the end was reached
-	  return false;
 
-	has_contour = true;
-	return true;
-      }
-
-      bool is_valid() {
-	using std::isinf;
-	if (has_contour == false)
-	  return false;
-	if (idx0 < 0 || idx1 < 0 || n < 1)
-	  return false;
-	if (!(min0 < max0) || !(min1 < max1))
-	  return false;
-	if (isinf(min0) || isinf(max0) || isinf(min1) || isinf(max1))
-	  return false;
-	return true;
-      }
+	bool is_valid() {
+	  using std::isinf;
+	  if (has_contour == false)
+	    return false;
+	  if (idx0 < 0 || idx1 < 0 || n < 1)
+	    return false;
+	  if (!(min0 < max0) || !(min1 < max1))
+	    return false;
+	  if (isinf(min0) || isinf(max0) || isinf(min1) || isinf(max1))
+	    return false;
+	  return true;
+	}
       
-      friend std::ostream& operator<<(std::ostream& os, const contour_info& contour);
-    };
+	friend std::ostream& operator<<(std::ostream& os, const contour_info& contour);
+      };
     
-    std::ostream& operator<<(std::ostream& os, const contour_info& contour) {
-      os << "contour_info:" << std::endl
-	 << "  has_contour: " << (contour.has_contour?"true":"false") << std::endl;
-      if (contour.has_contour == false)
-	return os;
+      std::ostream& operator<<(std::ostream& os, const contour_info& contour) {
+	os << "contour_info:" << std::endl
+	   << "  has_contour: " << (contour.has_contour?"true":"false") << std::endl;
+	if (contour.has_contour == false)
+	  return os;
 
-      os << "  index 0:     " << contour.idx0 << " (" << contour.min0 << ", " << contour.max0 << ")" << std::endl
-	 << "  index 1:     " << contour.idx1 << " (" << contour.min1 << ", " << contour.max1 << ")" << std::endl
-	 << "  n:           " << contour.n << std::endl;
-      return os;
+	os << "  index 0:     " << contour.idx0 << " (" << contour.min0 << ", " << contour.max0 << ")" << std::endl
+	   << "  index 1:     " << contour.idx1 << " (" << contour.min1 << ", " << contour.max1 << ")" << std::endl
+	   << "  n:           " << contour.n << std::endl;
+	return os;
+      }
     }
         
     void print_nuts_help(std::string cmd) {
