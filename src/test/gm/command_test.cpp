@@ -9,8 +9,8 @@ TEST(GmCommand,PopulateContour_good) {
 
   EXPECT_FALSE(contour.has_contour);
 
-  contour_string = "(0,-1,2,3,-4,5,6)";
-  EXPECT_TRUE(contour.populate(contour_string));
+  contour_string = "(0,-1,2,3,-4,5,6;7,8)";
+  EXPECT_TRUE(contour.populate(contour_string,1,1));
   EXPECT_TRUE(contour.has_contour);
   EXPECT_EQ(0, contour.idx0);
   EXPECT_FLOAT_EQ(-1, contour.min0);
@@ -19,13 +19,15 @@ TEST(GmCommand,PopulateContour_good) {
   EXPECT_FLOAT_EQ(-4, contour.min1);
   EXPECT_FLOAT_EQ(5, contour.max1);
   EXPECT_EQ(6, contour.n);
-
+  ASSERT_EQ(1U, contour.reals.size());
+  EXPECT_FLOAT_EQ(7, contour.reals[0]);
+  ASSERT_EQ(1U, contour.ints.size());
+  EXPECT_EQ(8, contour.ints[0]);
   
   contour.has_contour = false;
 
-
-  contour_string = "(10,-11,12,13,-14,15)";
-  EXPECT_TRUE(contour.populate(contour_string));
+  contour_string = "(10,-11,12,13,-14,15;16,17)";
+  EXPECT_TRUE(contour.populate(contour_string,2,0));
   EXPECT_TRUE(contour.has_contour);
   EXPECT_EQ(10, contour.idx0);
   EXPECT_FLOAT_EQ(-11, contour.min0);
@@ -34,6 +36,10 @@ TEST(GmCommand,PopulateContour_good) {
   EXPECT_FLOAT_EQ(-14, contour.min1);
   EXPECT_FLOAT_EQ(15, contour.max1);
   EXPECT_EQ(101, contour.n);
+  ASSERT_EQ(2U, contour.reals.size());
+  EXPECT_FLOAT_EQ(16, contour.reals[0]);
+  EXPECT_FLOAT_EQ(17, contour.reals[1]);
+  ASSERT_EQ(0U, contour.ints.size());
 }
 
 
@@ -42,26 +48,35 @@ TEST(GmCommand, PopulateContour_bad) {
   stan::gm::contour_info contour;
   
   contour_string = "0,-1,2,3,-4,5,6";
-  EXPECT_FALSE(contour.populate(contour_string))
+  EXPECT_FALSE(contour.populate(contour_string,2,0))
     << "should fail without open and close parens";
   
   
   contour_string = "(0,-1,2,3,-4,5,6";
-  EXPECT_FALSE(contour.populate(contour_string))
+  EXPECT_FALSE(contour.populate(contour_string,2,0))
     << "should fail without close paren";
 
   contour_string = "0,-1,2,3,-4,5,6)";
-  EXPECT_FALSE(contour.populate(contour_string))
+  EXPECT_FALSE(contour.populate(contour_string,2,0))
     << "should fail without open paren";
 
   
   contour_string = "(0,-1,2,3,-4)";
-  EXPECT_FALSE(contour.populate(contour_string))
+  EXPECT_FALSE(contour.populate(contour_string,2,0))
     << "should fail without enough arguments";
 
   contour_string = "(0,-1,2,3,-4,a)";
-  EXPECT_FALSE(contour.populate(contour_string))
+  EXPECT_FALSE(contour.populate(contour_string,2,0))
     << "should fail without a valid value";
+
+  contour_string = "(0,-1,2,3,-4,5,6)";
+  EXPECT_FALSE(contour.populate(contour_string,2,0))
+    << "should fail with missing parameter values";
+
+  contour_string = "(0,-1,2,3,-4,5,6;0)";
+  EXPECT_FALSE(contour.populate(contour_string,2,0))
+    << "should fail with incorrect number of parameter values";
+
 }
 
 

@@ -47,12 +47,16 @@ namespace stan {
 	int idx1;
 	double min1, max1;
 	int n;
+	std::vector<double> reals;
+	std::vector<int> ints;
       
-	bool populate(const std::string& contour_string) {
+	bool populate(const std::string& contour_string, size_t n_reals, size_t n_ints) {
 	  has_contour = false;
 	  if (contour_string.find("(") != 0)
 	    return false;
 	  if (contour_string.find(")") != contour_string.size()-1)
+	    return false;
+	  if (contour_string.find(";") < 0)
 	    return false;
 	  std::stringstream ss(contour_string);
 	  if (ss.get() && !(ss >> idx0)) // pop '(', read idx0
@@ -67,13 +71,24 @@ namespace stan {
 	    return false;
 	  if (ss.get() && !(ss >> max1)) // pop ',', read max1
 	    return false;
-	  if (ss.get() == ',') {         // if ',', read n, then ')'
-	    if (!(ss >> n) || (ss.get() < 0))
+	  if (ss.peek() == ',') {        // if ',', read n
+	    if (ss.get() && !(ss >> n))
 	      return false;
 	  } else {                       // else set n to default
 	    n = 101;
 	  }
-	  if (ss.get() > -1)             // final check to see if the end was reached
+	    
+	  reals = std::vector<double>(n_reals);  // read each real value
+	  for (size_t i = 0; i < n_reals; i++) {
+	    if (ss.get() && !(ss >> reals[i]))
+	      return false;
+	  }
+	  ints = std::vector<int>(n_ints);       // read each int value
+	  for (size_t i = 0; i < n_ints; i++) {
+	    if (ss.get() && !(ss >> ints[i]))
+	      return false;
+	  }
+	  if (ss.get() != ')' && ss.get() > -1)  // final check to see if the end was reached
 	    return false;
 
 	  has_contour = true;
@@ -236,7 +251,7 @@ namespace stan {
 			"Preset an estimated covariance matrix");
 
       print_help_option(&std::cout,
-			"contour","(idx0,min,max,idx1,min,max,n=101)",
+			"contour","(idx0,min,max,idx1,min,max,n=101;<default param values>)",
 			"Generate contour information for graphical diagnostics."
 			"Format is index of parameter 0 and its min/max, index of parameter 1 and its min/max, and the number of points");
       
@@ -466,9 +481,9 @@ namespace stan {
       if (command.has_key("contour")) {
 	std::string contour_string;
 	command.val("contour", contour_string);
-	if (contour.populate(contour_string) == false) {
+	if (contour.populate(contour_string, model.num_params_r(), model.num_params_i()) == false) {
 	  std::cerr << "contour value is not formatted properly; " 
-		    << "expecting (idx0,min,max,idx1,min,max,n)"
+		    << "expecting (idx0,min,max,idx1,min,max,n;<default param values>)"
 		    << std::endl;
 	  return -1;
 	}
