@@ -478,7 +478,7 @@ namespace stan {
       command.val("cov_matrix", cov_file);
 
       contour_info contour;
-      if (command.has_key("contour")) {
+      if (command.has_key("contour") || command.has_flag("contour")) {
 	std::string contour_string;
 	command.val("contour", contour_string);
 	if (contour.populate(contour_string, model.num_params_r(), model.num_params_i()) == false) {
@@ -675,6 +675,26 @@ namespace stan {
 
         return 0;
       }      
+      if (contour.has_contour) {
+	std::cout << "STAN CONTOUR COMMAND" << std::endl;
+        if (data_file == "")
+          std::cout << "data = (specified model requires no data)" << std::endl;
+        else 
+          std::cout << "data = " << data_file << std::endl;
+
+        std::cout << "init = " << init_val << std::endl;
+        if (num_init_tries > 0)
+          std::cout << "init tries = " << num_init_tries << std::endl;
+
+        std::cout << "output = " << sample_file << std::endl;
+
+        std::fstream sample_stream(sample_file.c_str(), 
+                                   samples_append_mode);
+
+	return 0;
+      }
+
+
 
       std::cout << "STAN SAMPLING COMMAND" << std::endl;
       if (data_file == "")
