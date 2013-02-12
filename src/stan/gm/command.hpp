@@ -8,7 +8,7 @@
 //#include <iomanip>
 //#include <iostream>
 #include <fstream>
-//#include <sstream>
+#include <sstream>
 //#include <vector>
 #include <boost/random/additive_combine.hpp> // L'Ecuyer RNG
 //#include <boost/random/mersenne_twister.hpp>
@@ -32,6 +32,53 @@
 namespace stan {
 
   namespace gm {
+    
+    struct contour_info {
+      contour_info() 
+	: has_contour(false),
+	  idx0(0), min0(0), max0(0),
+	  idx1(0), min1(0), max1(0),
+	  n(0) {}
+
+      bool has_contour;
+      int idx0;
+      double min0, max0;
+      int idx1;
+      double min1, max1;
+      int n;
+      
+      bool populate(const std::string& contour_string) {
+	has_contour = false;
+	if (contour_string.find("(") != 0)
+	  return false;
+	if (contour_string.find(")") != contour_string.size()-1)
+	  return false;
+	std::stringstream ss(contour_string);
+	if (ss.get() && !(ss >> idx0)) // pop '(', read idx0
+	  return false;
+	if (ss.get() && !(ss >> min0)) // pop ',', read min0
+	  return false;
+	if (ss.get() && !(ss >> max0)) // pop ',', read max0
+	  return false;
+	if (ss.get() && !(ss >> idx1)) // pop ',', read idx1
+	  return false;
+	if (ss.get() && !(ss >> min1)) // pop ',', read min1
+	  return false;
+	if (ss.get() && !(ss >> max1)) // pop ',', read max1
+	  return false;
+	if (ss.get() == ',') {         // if ',', read n, then ')'
+	  if (!(ss >> n) || (ss.get() < 0))
+	    return false;
+	} else {                       // else set n to default
+	  n = 101;
+	}
+	if (ss.get() > -1)             // final check to see if the end was reached
+	  return false;
+
+	has_contour = true;
+	return true;
+      }
+    };
 
         
     void print_nuts_help(std::string cmd) {
@@ -159,7 +206,13 @@ namespace stan {
       print_help_option(&std::cout,
 			"cov_matrix","file",
 			"Preset an estimated covariance matrix");
+
+      print_help_option(&std::cout,
+			"contour","(idx0,min,max,idx1,min,max,n=101)",
+			"Generate contour information for graphical diagnostics."
+			"Format is index of parameter 0 and its min/max, index of parameter 1 and its min/max, and the number of points");
       
+
       std::cout << std::endl;
     }
 
@@ -380,6 +433,19 @@ namespace stan {
     
       std::string cov_file = "";
       command.val("cov_matrix", cov_file);
+
+      contour_info contour;
+      if (command.has_key("contour")) {
+	std::string contour_string;
+	command.val("contour", contour_string);
+	if (contour.populate(contour_string) == false) {
+	  std::cerr << "contour value is not formatted properly; " 
+		    << "expecting (idx0,min,max,idx1,min,max,n)"
+		    << std::endl;
+	  return -1;
+	}
+      }
+      
 
       unsigned int random_seed = 0;
       if (command.has_key("seed")) {
