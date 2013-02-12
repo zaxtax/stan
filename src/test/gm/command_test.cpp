@@ -137,7 +137,7 @@ TEST(GmCommand, PopulateContour_invalid) {
   contour.idx0        = 0;
   contour.min0        = -1;
   contour.max0        = 1;
-  contour.idx1        = 1;
+  contour.idx1        = -1;
   contour.min1        = -1;
   contour.max1        = 1;
   contour.n           = 101;

@@ -80,10 +80,32 @@ namespace stan {
       }
 
       bool is_valid() {
-	return false;
+	using std::isinf;
+	if (has_contour == false)
+	  return false;
+	if (idx0 < 0 || idx1 < 0 || n < 1)
+	  return false;
+	if (!(min0 < max0) || !(min1 < max1))
+	  return false;
+	if (isinf(min0) || isinf(max0) || isinf(min1) || isinf(max1))
+	  return false;
+	return true;
       }
+      
+      friend std::ostream& operator<<(std::ostream& os, const contour_info& contour);
     };
+    
+    std::ostream& operator<<(std::ostream& os, const contour_info& contour) {
+      os << "contour_info:" << std::endl
+	 << "  has_contour: " << (contour.has_contour?"true":"false") << std::endl;
+      if (contour.has_contour == false)
+	return os;
 
+      os << "  index 0:     " << contour.idx0 << " (" << contour.min0 << ", " << contour.max0 << ")" << std::endl
+	 << "  index 1:     " << contour.idx1 << " (" << contour.min1 << ", " << contour.max1 << ")" << std::endl
+	 << "  n:           " << contour.n << std::endl;
+      return os;
+    }
         
     void print_nuts_help(std::string cmd) {
       using stan::io::print_help_option;
