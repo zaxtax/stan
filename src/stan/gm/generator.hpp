@@ -2819,6 +2819,20 @@ namespace stan {
     }
 
 
+    void generate_write_contour_header_method(const program& prog,
+					      std::ostream& o) {
+      write_csv_header_visgen vis(o);
+      o << EOL << INDENT << "void write_contour_header(std::ostream& o__, const size_t idx0, const size_t idx1) {" << EOL;
+      o << INDENT2 << "std::vector<std::string> headers = unconstrained_csv_header();" << EOL2;
+      o << INDENT2 << "o__ << headers[idx0] << ','" << EOL;
+      o << INDENT2 << "    << headers[idx1] << ','" << EOL;
+      o << INDENT2 << "    << \"lp\"" << EOL;
+      o << INDENT2 << "    << std::endl;" << EOL;
+      o << INDENT << "}" << EOL2;
+    }
+
+
+
     // see init_member_var_visgen for cut & paste
     struct write_array_visgen : public visgen {
       write_array_visgen(std::ostream& o)
@@ -3331,6 +3345,7 @@ namespace stan {
       generate_write_unconstrained_csv_header_method(prog,out);
       generate_write_csv_header_method(prog,out);
       generate_write_csv_method(prog,model_name,out);
+      generate_write_contour_header_method(prog,out);
       generate_end_class_decl(out);
       generate_end_namespace(out);
       if (include_main) 
