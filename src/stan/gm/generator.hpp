@@ -2467,6 +2467,7 @@ namespace stan {
         matrix_args.push_back(x.K_);
         generate_unconstrained_csv_header_array(matrix_args,prefix+x.name_,x.dims_);
       }
+
       void 
       generate_unconstrained_csv_header_array(const std::vector<expression>& matrix_dims, 
 					      const std::string& name,
@@ -2486,15 +2487,16 @@ namespace stan {
         }
 
         // variable + indices
-        generate_indent(2 + combo_dims.size(),o_);
-        o_ << "writer__.comma();" << EOL;  // only writes comma after first call
-
-        generate_indent(2 + combo_dims.size(),o_);
-        o_ << "o__ << \"" << name << '"';
+	generate_indent(2 + combo_dims.size(),o_);
+	o_ << "std::stringstream param_name;" << EOL;
+	generate_indent(2 + combo_dims.size(),o_);
+        o_ << "param_name << \"" << name << '"';
         for (size_t i = 0; i < combo_dims.size(); ++i)
           o_ << " << '.' << k_" << i << "__";
         o_ << ';' << EOL;
-
+	generate_indent(2 + combo_dims.size(),o_);
+	o_ << "header.push_back(param_name.str());" << EOL;
+	
         // end for loop dims
         for (size_t i = 0; i < combo_dims.size(); ++i) {
           generate_indent(1 + combo_dims.size() - i,o_);
@@ -2507,17 +2509,26 @@ namespace stan {
     void generate_write_unconstrained_csv_header_method(const program& prog,
                                           std::ostream& o) {
       write_unconstrained_csv_header_visgen vis(o);
-      o << EOL << INDENT << "void write_unconstrained_csv_header(std::ostream& o__, const bool debug) {" << EOL;
-      o << INDENT2 << "if (debug == false)" << EOL
-	<< INDENT3 << "return;" << EOL;
       
-      o << INDENT2 << "stan::io::csv_writer writer__(o__);" << EOL;
-      o << INDENT2 << "writer__.comma();" << EOL;
-
+      o << EOL << INDENT << "std::vector<std::string> unconstrained_csv_header() {" << EOL;
+      o << INDENT2 << "std::vector<std::string> header;" << EOL;
+      
       // parameters
       for (size_t i = 0; i < prog.parameter_decl_.size(); ++i) {
         boost::apply_visitor(vis,prog.parameter_decl_[i].decl_);
       }
+      
+      o << INDENT2 << "return header;" << EOL;
+      o << INDENT << "}" << EOL2;
+      
+
+      o << EOL << INDENT << "void write_unconstrained_csv_header(std::ostream& o__, const bool debug) {" << EOL;
+      o << INDENT2 << "if (debug == false)" << EOL
+	<< INDENT3 << "return;" << EOL;
+
+      o << INDENT2 << "std::vector<std::string> headers = unconstrained_csv_header();" << EOL;
+      o << INDENT2 << "for (size_t n = 0; n < headers.size(); n++) " << EOL;
+      o << INDENT3 << "o__ << \",\" << headers[n];" << EOL;
       o << INDENT << "}" << EOL2;
     }
 

@@ -220,3 +220,4 @@ TEST(GmCommand, PopulateContour_invalid) {
     << "invalid contour: n is not greater than 0";
 
 }
+
