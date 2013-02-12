@@ -2417,55 +2417,55 @@ namespace stan {
       }
       void operator()(const nil& /*x*/) const  { }
       void operator()(const int_var_decl& x) const {
-        generate_unconstrained_csv_header_array(EMPTY_EXP_VECTOR,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(EMPTY_EXP_VECTOR,x.name_,x.dims_);
       }
       void operator()(const double_var_decl& x) const {
-        generate_unconstrained_csv_header_array(EMPTY_EXP_VECTOR,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(EMPTY_EXP_VECTOR,x.name_,x.dims_);
       }
       void operator()(const vector_var_decl& x) const {
         std::vector<expression> matrix_args;
         matrix_args.push_back(x.M_);
-        generate_unconstrained_csv_header_array(matrix_args,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(matrix_args,x.name_,x.dims_);
       }
       void operator()(const row_vector_var_decl& x) const {
         std::vector<expression> matrix_args;
         matrix_args.push_back(x.N_);
-        generate_unconstrained_csv_header_array(matrix_args,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(matrix_args,x.name_,x.dims_);
       }
       void operator()(const matrix_var_decl& x) const {
         std::vector<expression> matrix_args;
         matrix_args.push_back(x.M_);
         matrix_args.push_back(x.N_);
-        generate_unconstrained_csv_header_array(matrix_args,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(matrix_args,x.name_,x.dims_);
       }
       void operator()(const simplex_var_decl& x) const {
         std::vector<expression> matrix_args;
         matrix_args.push_back(x.K_);
 	int_minus_1_vis vis;
 	boost::apply_visitor(vis, matrix_args[0].expr_);
-        generate_unconstrained_csv_header_array(matrix_args,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(matrix_args,x.name_,x.dims_);
       }
       void operator()(const ordered_var_decl& x) const {
         std::vector<expression> matrix_args;
         matrix_args.push_back(x.K_);
-        generate_unconstrained_csv_header_array(matrix_args,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(matrix_args,x.name_,x.dims_);
       }
       void operator()(const positive_ordered_var_decl& x) const {
         std::vector<expression> matrix_args;
         matrix_args.push_back(x.K_);
-        generate_unconstrained_csv_header_array(matrix_args,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(matrix_args,x.name_,x.dims_);
       }
       void operator()(const cov_matrix_var_decl& x) const {
         std::vector<expression> matrix_args;
         matrix_args.push_back(x.K_);
         matrix_args.push_back(x.K_);
-        generate_unconstrained_csv_header_array(matrix_args,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(matrix_args,x.name_,x.dims_);
       }
       void operator()(const corr_matrix_var_decl& x) const {
         std::vector<expression> matrix_args;
         matrix_args.push_back(x.K_);
         matrix_args.push_back(x.K_);
-        generate_unconstrained_csv_header_array(matrix_args,prefix+x.name_,x.dims_);
+        generate_unconstrained_csv_header_array(matrix_args,x.name_,x.dims_);
       }
 
       void 
@@ -2505,7 +2505,6 @@ namespace stan {
       }
     };
 
-
     void generate_write_unconstrained_csv_header_method(const program& prog,
                                           std::ostream& o) {
       write_unconstrained_csv_header_visgen vis(o);
@@ -2528,10 +2527,9 @@ namespace stan {
 
       o << INDENT2 << "std::vector<std::string> headers = unconstrained_csv_header();" << EOL;
       o << INDENT2 << "for (size_t n = 0; n < headers.size(); n++) " << EOL;
-      o << INDENT3 << "o__ << \",\" << headers[n];" << EOL;
+      o << INDENT3 << "o__ << \",\" << \"unconstrained_\" << headers[n];" << EOL;
       o << INDENT << "}" << EOL2;
     }
-
 
     // see init_member_var_visgen for cut & paste
     struct write_csv_visgen : public visgen {
@@ -2824,10 +2822,12 @@ namespace stan {
       write_csv_header_visgen vis(o);
       o << EOL << INDENT << "void write_contour_header(std::ostream& o__, const size_t idx0, const size_t idx1) {" << EOL;
       o << INDENT2 << "std::vector<std::string> headers = unconstrained_csv_header();" << EOL2;
-      o << INDENT2 << "o__ << headers[idx0] << ','" << EOL;
-      o << INDENT2 << "    << headers[idx1] << ','" << EOL;
-      o << INDENT2 << "    << \"lp\"" << EOL;
-      o << INDENT2 << "    << std::endl;" << EOL;
+      o << INDENT2 << "o__ << \"unconstrained_\" << headers[idx0] << ','" << EOL;
+      o << INDENT2 << "    << \"unconstrained_\" << headers[idx1] << ','" << EOL;
+      o << INDENT2 << "    << \"lp\";" << EOL;
+      o << INDENT2 << "for (size_t i = 0; i < headers.size(); i++)" << EOL;
+      o << INDENT3 << "o__ << \",\" << \"gradient_\" << headers[i];" << EOL;
+      o << INDENT2 << "o__ << std::endl;" << EOL;
       o << INDENT << "}" << EOL2;
     }
 

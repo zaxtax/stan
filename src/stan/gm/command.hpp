@@ -743,8 +743,38 @@ namespace stan {
 				    contour);
 
 	model.write_contour_header(sample_stream,contour.idx0,contour.idx1);
+	
+	params_r = contour.reals;
+	params_i = contour.ints;
 
+	int m = 0;
+	num_iterations = contour.n * contour.n;
+	int it_print_width = std::ceil(std::log10(num_iterations));
+	std::vector<double> gradient;	
+	const double x_step = (contour.max0-contour.min0) / (contour.n-1);
+	const double y_step = (contour.max1-contour.min1) / (contour.n-1);
+	for (double x = contour.min0; x <= contour.max0; x += x_step)
+	  for (double y = contour.min1; y <= contour.max1; y += y_step) {
+	    if (do_print(m++,refresh)) {
+	      std::cout << "Contour: ";
+	      std::cout << std::setw(it_print_width) << m
+			<< " / " << num_iterations;
+	      std::cout << " [" << std::setw(3) 
+			<< static_cast<int>((100.0 * m)/num_iterations)
+			<< "%] ";
+	      std::cout << std::endl;
+	      std::cout.flush();
+	    }
 
+	    params_r[contour.idx0] = x;
+	    params_r[contour.idx1] = y;
+
+	    double lp = model.grad_log_prob(params_r, params_i, gradient);
+	    sample_stream << x << "," << y << "," << lp;
+	    for (size_t i = 0; i < gradient.size(); i++)
+	      sample_stream << "," << gradient[i];
+	    sample_stream << std::endl;
+	  }
 	return 0;
       }
 
