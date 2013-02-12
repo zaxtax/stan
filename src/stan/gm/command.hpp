@@ -78,6 +78,10 @@ namespace stan {
 	has_contour = true;
 	return true;
       }
+
+      bool is_valid() {
+	return false;
+      }
     };
 
         
