@@ -3,13 +3,14 @@
 
 
 TEST(GmCommand,PopulateContour_good) {
-  std::string contour_string1 = "(0,-1,2,3,-4,5,6)";
-  std::string contour_string2 = "(10,-11,12,13,-14,15)";
+  std::string contour_string;
   
   stan::gm::contour_info contour;
+
   EXPECT_FALSE(contour.has_contour);
-  
-  EXPECT_TRUE(contour.populate(contour_string1));
+
+  contour_string = "(0,-1,2,3,-4,5,6)";
+  EXPECT_TRUE(contour.populate(contour_string));
   EXPECT_TRUE(contour.has_contour);
   EXPECT_EQ(0, contour.idx0);
   EXPECT_FLOAT_EQ(-1, contour.min0);
@@ -21,7 +22,10 @@ TEST(GmCommand,PopulateContour_good) {
 
   
   contour.has_contour = false;
-  EXPECT_TRUE(contour.populate(contour_string2));
+
+
+  contour_string = "(10,-11,12,13,-14,15)";
+  EXPECT_TRUE(contour.populate(contour_string));
   EXPECT_TRUE(contour.has_contour);
   EXPECT_EQ(10, contour.idx0);
   EXPECT_FLOAT_EQ(-11, contour.min0);
@@ -30,4 +34,32 @@ TEST(GmCommand,PopulateContour_good) {
   EXPECT_FLOAT_EQ(-14, contour.min1);
   EXPECT_FLOAT_EQ(15, contour.max1);
   EXPECT_EQ(101, contour.n);
+}
+
+
+TEST(GmCommand, PopulateContour_bad) {
+  std::string contour_string;
+  stan::gm::contour_info contour;
+  
+  contour_string = "0,-1,2,3,-4,5,6";
+  EXPECT_FALSE(contour.populate(contour_string))
+    << "should fail without open and close parens";
+  
+  
+  contour_string = "(0,-1,2,3,-4,5,6";
+  EXPECT_FALSE(contour.populate(contour_string))
+    << "should fail without close paren";
+
+  contour_string = "0,-1,2,3,-4,5,6)";
+  EXPECT_FALSE(contour.populate(contour_string))
+    << "should fail without open paren";
+
+  
+  contour_string = "(0,-1,2,3,-4)";
+  EXPECT_FALSE(contour.populate(contour_string))
+    << "should fail without enough arguments";
+
+  contour_string = "(0,-1,2,3,-4,a)";
+  EXPECT_FALSE(contour.populate(contour_string))
+    << "should fail without a valid value";
 }
