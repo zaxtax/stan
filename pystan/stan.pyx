@@ -75,9 +75,12 @@ def test():
 def test2():
     code = test()
     weave.inline(code,
-                 [],
+                 "",
                  libraries=['boost', 'eigen'],
                  library_dirs=['../lib','../bin'],
+                 include_dirs=['../src',
+                               '../lib/eigen_3.1.3',
+                               '../lib/boost_1.53.0'],
                  type_converters=converters.blitz,
                  compiler='gcc')
     
