@@ -11,8 +11,7 @@ cdef extern from "stanc.hpp":
                  string model_name,
                  error_buf) except +
 
-def stan_model(file,
-               model_name = "anon_model",
+def stan_model( model_name = "anon_model",
                model_code = '',
                stanc_ret = None,
                boost_lib = None,
@@ -20,7 +19,7 @@ def stan_model(file,
                save_dso = True,
                verbose = False,
                ): #...):
-    pass
+    return stanc(model_code, "_"+model_name, sys.stderr)
 
 def stan(file,
          sample_file, # the file to which the samples are written
@@ -41,7 +40,10 @@ def stan(file,
     pass
 
 cpdef extract(model_code, model_name):
-    return stanc(model_code, model_name, sys.stderr)
+    pass
+
+def samples():
+    pass
 
 def test():
     model_code = """
@@ -65,5 +67,5 @@ def test():
       y ~ normal(theta, sigma);
     }
     """
-    print extract(model_code, "8schools")
+    return stan_model(model_code, "8schools")
     

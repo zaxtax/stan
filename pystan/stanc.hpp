@@ -34,7 +34,7 @@ std::string stanc(std::string model_stancode, std::string model_name, PyObject* 
     std::ostream errstream(&errbuf);
 
     bool valid_model
-      = stan::gm::compile(&errstream,in,out,model_name);
+      = stan::gm::compile(&errstream,in,out,model_name, false);
     if (!valid_model) {
        throw std::invalid_argument("Parsing error");
     }
