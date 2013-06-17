@@ -6,13 +6,16 @@ from cpython cimport bool
 import sys
 import random
 
+from scipy import weave
+from scipy.weave import converters
+
 cdef extern from "stanc.hpp":
     string stanc(string model_code,
                  string model_name,
                  error_buf) except +
 
-def stan_model( model_name = "anon_model",
-               model_code = '',
+def stan_model(model_code= "anon_model",
+               model_name = '',
                stanc_ret = None,
                boost_lib = None,
                eigen_lib = None,
@@ -68,4 +71,13 @@ def test():
     }
     """
     return stan_model(model_code, "8schools")
+    
+def test2():
+    code = test()
+    weave.inline(code,
+                 [],
+                 libraries=['boost', 'eigen'],
+                 library_dirs=['../lib','../bin'],
+                 type_converters=converters.blitz,
+                 compiler='gcc')
     
